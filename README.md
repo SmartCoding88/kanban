@@ -7,4 +7,5 @@
     <li>npm install</li>
     <li>npm i socket.io-client react-router-dom/li>
     <li>npm run dev </li>
+    <li><b>For Drag & Drop : </b> npm i react-beautiful-dnd</li>
 </ul>

@@ -19,6 +19,10 @@ const router= createBrowserRouter([
     element: <Task />,
   },
   {
+    path: "/comments",
+    element: <Comments />,
+  },
+  {
     path: "/comments/:category/:id",
     element: <Comments />,
   }
