@@ -91,6 +91,33 @@ app.get("/api", (req, res) => {
 io.on('connection', (socket) => {
     console.log(`${socket.id} A user connected`)
 
+    socket.on("createTask", (data)=>{
+        const newTask = {id: generateID(), title: data, comments: []}
+        tasks["pending"].items.push(newTask)
+
+        io.sockets.emit("tasks", tasks) //emit to every socket
+    })
+
+    //addComment
+    socket.on("addComment", (data)=>{
+        const taskItems = tasks[data.category].items;
+
+        for(let i=0; i< taskItems.length; i++ ){
+
+            if(taskItems[i].id === data.id){
+                taskItems[i].comments.push({
+                    name: data.userId,
+                    text: data.comment,
+                    id: generateID()
+                })
+            }
+
+            socket.emit("comments", taskItems[i].comments)
+        }
+
+        io.sockets.emit("tasks", tasks) //emit to every socket
+    })
+
     socket.on("taskDragged", (data) => {
 		const { source, destination } = data;
 		const itemMoved = {

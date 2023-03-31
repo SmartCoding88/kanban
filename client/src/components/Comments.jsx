@@ -1,13 +1,30 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import io from 'socket.io-client'
 
+const socket = io.connect("http://localhost:3001")
 const Comments = () => {
 
   const commentRef = useRef(null)
+  const [commentList, setCommentList] = useState([])
+  const { category, id } = useParams()
 
-  function addComment(event){
+  useEffect(() => {
+    socket.on("comments", (data) => setCommentList(data))
+  }, [])
+
+  function addComment(event) {
     event.preventDefault();
-    console.log(commentRef.current.value)
+    socket.emit("addComment", {
+      comment: commentRef.current.value,
+      category,
+      id,
+      userId: localStorage.getItem("userId")
+    });
+
+    commentRef.current.value = ""
   }
+
   return (
     <div className='comments__container'>
 
@@ -15,7 +32,7 @@ const Comments = () => {
         <label htmlFor='comment'>Add a comment</label>
         <textarea
           placeholder='Type your comment...'
-          
+
           rows={5}
           id='comment'
           name='comment'
@@ -27,8 +44,17 @@ const Comments = () => {
 
       <div className="comments__section">
         <h2>Existing Comments</h2>
+        {commentList?.map((comment) => {
+          <div key={comment.id}>
+            <p>
+              <span style={{fontWeight: 'bold'}}>{comment.text}</span> by{" "} {comment.name}
+            </p>
+          </div>
+        })
+
+        }
       </div>
-     
+
     </div>
   )
 }
