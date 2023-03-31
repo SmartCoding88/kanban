@@ -5,7 +5,7 @@ import AddTask from "./AddTask"
 import io  from "socket.io-client"
 
 //connect to server
-const socket = io.connect("http://localhost:3001")
+const socket = io.connect("http://localhost:3002")
 
 const Task = () => {
   return (

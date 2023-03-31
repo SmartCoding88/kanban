@@ -5,7 +5,7 @@ const cors = require("cors");
 const env = require('dotenv')
 env.config()
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 const app = express()
 app.use(cors())
@@ -91,20 +91,31 @@ app.get("/api", (req, res) => {
 io.on('connection', (socket) => {
     console.log(`${socket.id} A user connected`)
 
-    socket.on("createTask", (data)=>{
-        const newTask = {id: generateID(), title: data, comments: []}
+    socket.on("createTask", (data) => {
+        const newTask = { id: generateID(), title: data, comments: [] }
         tasks["pending"].items.push(newTask)
 
         io.sockets.emit("tasks", tasks) //emit to every socket
     })
 
+    socket.on("fetchComments", (data) => {
+        if(tasks[data.category]){
+        const taskItems = tasks[data.category].items;
+        for (let i = 0; i < taskItems.length; i++) {
+            if (taskItems[i].id === data.id) {
+                socket.emit("comments", taskItems[i].comments);
+            }
+        }
+    }
+    });
+
     //addComment
-    socket.on("addComment", (data)=>{
+    socket.on("addComment", (data) => {
         const taskItems = tasks[data.category].items;
 
-        for(let i=0; i< taskItems.length; i++ ){
+        for (let i = 0; i < taskItems.length; i++) {
 
-            if(taskItems[i].id === data.id){
+            if (taskItems[i].id === data.id) {
                 taskItems[i].comments.push({
                     name: data.userId,
                     text: data.comment,
@@ -119,23 +130,22 @@ io.on('connection', (socket) => {
     })
 
     socket.on("taskDragged", (data) => {
-		const { source, destination } = data;
-		const itemMoved = {
-			...tasks[source.droppableId].items[source.index],
-		};
-		console.log("ItemMoved>>> ", itemMoved);
-		tasks[source.droppableId].items.splice(source.index, 1);
-		tasks[destination.droppableId].items.splice(
-			destination.index,
-			0,
-			itemMoved
-		);
-		console.log("Source >>>", tasks[source.droppableId].items);
-		console.log("Destination >>>", tasks[destination.droppableId].items);
-		socket.emit("tasks", tasks);
-	});
+        const { source, destination } = data;
+        const itemMoved = {
+            ...tasks[source.droppableId].items[source.index],
+        };
 
-    socket.on('disconnect', ()=>{
+        tasks[source.droppableId].items.splice(source.index, 1);
+        tasks[destination.droppableId].items.splice(
+            destination.index,
+            0,
+            itemMoved
+        );
+
+        socket.emit("tasks", tasks);
+    });
+
+    socket.on('disconnect', () => {
         socket.disconnect();
         console.log(`${socket.id} A user disconneted `)
     })

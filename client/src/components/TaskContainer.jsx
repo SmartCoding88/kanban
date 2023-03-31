@@ -9,7 +9,7 @@ const TaskContainer = ({ socket }) => {
     
 	useEffect(() => {
 		function getData() {
-			fetch("http://localhost:3001/api")
+			fetch("http://localhost:3002/api")
 				.then((res) => res.json())
 				.then((data) => setTasks(data));
 		}
