@@ -1,13 +1,13 @@
 import { useRef } from "react"
 
-const AddTask = () => {
+const AddTask = ({ socket }) => {
     const taskRef = useRef(null)
 
     function handleSubmit(event) { 
 
         event.preventDefault()
-        console.log(usernameRef.current.value)
-        usernameRef.current.value = ""
+        socket.emit("createTask",taskRef.current.value)
+        taskRef.current.value = ""
 
     }
 
